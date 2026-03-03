@@ -40,3 +40,5 @@ quast \
   $OUTDIR/assembly/final.contigs.fa \
   -o $OUTDIR/quast
 echo "[$SAMPLE] Pipeline finished!"
+
+#test line
