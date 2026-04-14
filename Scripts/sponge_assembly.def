@@ -1,0 +1,35 @@
+Bootstrap: docker
+From: mambaorg/micromamba:1.5.8
+
+%labels
+    Author Emma Rasco
+    Version 3.3
+    Description "Sponge metagenomics pipeline"
+
+%post -c /bin/bash
+set -e
+
+# Temporary folder for build
+mkdir -p /tmp/apptainer_tmp
+
+# Create environment
+micromamba create -y -n sponge_assembly python=3.11 \
+    fastqc fastp seqkit gawk coreutils \
+    megahit samtools bowtie2 metaxa \
+    vamb gtdbtk \
+    pilon openjdk \
+    gunc busco setuptools \
+    -c bioconda -c conda-forge
+
+# Clean caches to reduce container size
+micromamba clean --all --yes
+
+# Remove temporary build files
+rm -rf /tmp/apptainer_tmp/* || true
+
+%environment
+export MAMBA_ROOT_PREFIX=/opt/conda
+export PATH=/opt/conda/envs/sponge_assembly/bin:$PATH
+
+# Disable reading/writing host configs
+export MAMBA_NO_RC=true
