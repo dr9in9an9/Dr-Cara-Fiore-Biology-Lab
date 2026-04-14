@@ -30,44 +30,44 @@ mkdir -p $OUTDIR/{qc,mapping,dominant,polish,busco,gtdbtk,gunc}
 
 # Step 1: QC
 echo "Step 1: Fastp QC"
-#fastp \
-# -i $RAW_DIR/${SAMPLE}_R1_001.fastq.gz \
-# -I $RAW_DIR/${SAMPLE}_R2_001.fastq.gz \
-# -o $OUTDIR/qc/${SAMPLE}_R1_trimmed.fastq.gz \
-# -O $OUTDIR/qc/${SAMPLE}_R2_trimmed.fastq.gz \
-# -w $THREADS \
-# -h $OUTDIR/qc/${SAMPLE}_fastp.html \
-# -j $OUTDIR/qc/${SAMPLE}_fastp.json
+fastp \
+-i $RAW_DIR/${SAMPLE}_R1_001.fastq.gz \
+-I $RAW_DIR/${SAMPLE}_R2_001.fastq.gz \
+-o $OUTDIR/qc/${SAMPLE}_R1_trimmed.fastq.gz \
+-O $OUTDIR/qc/${SAMPLE}_R2_trimmed.fastq.gz \
+-w $THREADS \
+-h $OUTDIR/qc/${SAMPLE}_fastp.html \
+-j $OUTDIR/qc/${SAMPLE}_fastp.json
 
 # Step 2: Megahit assembly
 echo "Step 2: Megahit assembly"
-#megahit \
-# -1 $OUTDIR/qc/${SAMPLE}_R1_trimmed.fastq.gz \
-# -2 $OUTDIR/qc/${SAMPLE}_R2_trimmed.fastq.gz \
-# -o $OUTDIR/assembly \
-# -t $THREADS \
-# --min-contig-len 1500
+megahit \
+-1 $OUTDIR/qc/${SAMPLE}_R1_trimmed.fastq.gz \
+-2 $OUTDIR/qc/${SAMPLE}_R2_trimmed.fastq.gz \
+-o $OUTDIR/assembly \
+-t $THREADS \
+--min-contig-len 1500
 
 CONTIGS="$OUTDIR/assembly/final.contigs.fa"
 
 # Step 3: Mapping reads
 echo "Step 3: Mapping reads"
-#bowtie2-build $CONTIGS $OUTDIR/mapping/contigs_index
-#bowtie2 -x $OUTDIR/mapping/contigs_index \
-# -1 $OUTDIR/qc/${SAMPLE}_R1_trimmed.fastq.gz \
-# -2 $OUTDIR/qc/${SAMPLE}_R2_trimmed.fastq.gz \
-# -p $THREADS | samtools sort -@ $THREADS -o $OUTDIR/mapping/${SAMPLE}.bam
+bowtie2-build $CONTIGS $OUTDIR/mapping/contigs_index
+bowtie2 -x $OUTDIR/mapping/contigs_index \
+-1 $OUTDIR/qc/${SAMPLE}_R1_trimmed.fastq.gz \
+-2 $OUTDIR/qc/${SAMPLE}_R2_trimmed.fastq.gz \
+-p $THREADS | samtools sort -@ $THREADS -o $OUTDIR/mapping/${SAMPLE}.bam
 
-#samtools index $OUTDIR/mapping/${SAMPLE}.bam
+samtools index $OUTDIR/mapping/${SAMPLE}.bam
 
 # Step 4: VAMB binning
 echo "Step 4: VAMB binning"
-#vamb bin default \
-# --outdir $OUTDIR/bins \
-# --fasta $CONTIGS \
-# --bamdir $OUTDIR/mapping \
-# -m 1500 \
-# --minfasta 100000 
+vamb bin default \
+--outdir $OUTDIR/bins \
+--fasta $CONTIGS \
+--bamdir $OUTDIR/mapping \
+-m 1500 \
+--minfasta 100000 
 
 # Step 5: Contig coverage
 echo "Step 5: Contig coverage"
